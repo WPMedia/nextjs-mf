@@ -1,34 +1,52 @@
+const ConcatSource = require("webpack-sources/lib/ConcatSource");
+const Compilation = require("webpack/lib/Compilation");
 
-const ConcatSource = require('webpack-sources/lib/ConcatSource');
-
-const PLUGIN_NAME = "ModuleFedSingleRuntimePlugin";
+const PLUGIN_NAME = "EnableSingleRunTimeForFederationPlugin";
 
 /**
- * Merge a runtime with your remote entry.
+ * Merge the webpack runtime with your remote entry.
  */
-class ModuleFedSingleRuntimePlugin {
+module.exports = class EnableSingleRunTimeForFederationPlugin {
   /**
    * @param {object} options
-   * @param {string} [options.fileName= remoteEntry.js] The file name to concat the runtime with
-   * @param {string} [options.runtime= runtime.js] The runtime to merge
+   * @param {string} [options.filename] The file name to concat the runtime with
    */
   constructor(options) {
-    this._options = {fileName: 'remoteEntry.js', runtime: 'runtime.js', ...options};
+    this._options = options;
   }
+
   // Define `apply` as its prototype method which is supplied with compiler as its argument
   apply(compiler) {
-    if (!this._options) return null;
-    const options = this._options;
+    const { filename } = this._options;
+
+    if(!filename){
+      throw new Error(`${PLUGIN_NAME}: options.filename is required.`);
+    }
 
     // Specify the event hook to attach to
-    compiler.hooks.emit.tap(PLUGIN_NAME, (compilation) => {
-      const { assets } = compilation;
-      const runtime  = assets[this._options.runtime];
-      const remoteEntry = assets[this._options.fileName];
-      const mergedSource = new ConcatSource(runtime, remoteEntry);
-      assets[this._options.fileName] = mergedSource;
-    });
+    compiler.hooks.thisCompilation.tap(
+      PLUGIN_NAME,
+      (compilation) => {
+        compilation.hooks.processAssets.tap(
+          {
+            name: PLUGIN_NAME,
+            stage: Compilation.PROCESS_ASSETS_STAGE_ADDITIONS,
+          },
+          (assets) => {
+            Object.keys(assets).forEach((asset) => {
+              if (asset.includes("static/chunks/webpack")) {
+                compilation.updateAsset(
+                  filename,
+                  new ConcatSource(
+                    compilation.getAsset(asset).source.buffer().toString(),
+                    compilation.getAsset(filename).source.buffer().toString()
+                  )
+                );
+              }
+            });
+          }
+        );
+      }
+    );
   }
 };
-
-module.exports = ModuleFedSingleRuntimePlugin;
