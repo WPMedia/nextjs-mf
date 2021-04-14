@@ -1,0 +1,25 @@
+{
+  "name": "nextjs2",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "build": "rm -rf .next && next build",
+    "start": "next start -p 3001",
+    "dev": "rm -rf .next && next dev -p 3001",
+    "prod": "yarn build && yarn start",
+    "export": "next export",
+    "serve": "cd out && serve -p 3001",
+    "ssg": "yarn build && yarn export && yarn serve"
+  },
+  "dependencies": {
+    "@module-federation/nextjs-mf": "../../",
+    "next": "^10.0.0",
+    "react": "^16.14.0",
+    "react-dom": "^16.14.0",
+    "webpack": "~5.30.0",    
+    "lodash": "^4.17.20"
+  },
+  "devDependencies": {
+    "serve": "^11.3.2"
+  }
+}
