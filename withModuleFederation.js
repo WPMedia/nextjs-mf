@@ -37,7 +37,7 @@ const withModuleFederation = (config, options, mfConfig) => {
   }
 
   if (!options.isServer) {
-    config.output.library = mfConfig.name;
+    config.output.library = mfConfig.name || "app";
 
     config.externals = {
       react: "React",
@@ -52,8 +52,8 @@ const withModuleFederation = (config, options, mfConfig) => {
 
   const federationConfig = {
     // defaults
-    name: mfConfig.name || "remote",
-    library: { type: config.output.libraryTarget, name: (mfConfig.name || "remote") },
+    name: mfConfig.name || "app",
+    library: { type: config.output.libraryTarget, name: (mfConfig.name || "app") },
     filename: "static/runtime/remoteEntry.js",
     exposes: {},
     remotes: {},
