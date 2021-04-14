@@ -28,7 +28,13 @@ const withModuleFederation = (config, options, mfConfig) => {
     throw new Error("Module Federation only works with Webpack 5");
   }
 
+  // Top-Level Await is required for this to work
   config.experiments = { topLevelAwait: true };
+
+  // For some reason chunk-splitting causes an error
+  if(mfConfig.exposes){
+    config.optimization.splitChunks = false;
+  }
 
   if (!options.isServer) {
     config.output.library = mfConfig.name;
