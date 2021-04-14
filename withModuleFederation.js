@@ -23,7 +23,13 @@ const nextServerRemote = (remoteObject) => {
 };
 
 const withModuleFederation = (config, options, mfConfig) => {
+
+  if (!options.webpack.container) {
+    throw new Error("Module Federation only works with Webpack 5");
+  }
+
   config.experiments = { topLevelAwait: true };
+
   if (!options.isServer) {
     config.output.library = mfConfig.name;
 
@@ -37,26 +43,34 @@ const withModuleFederation = (config, options, mfConfig) => {
       // "react-dom": path.resolve("./react-dom.js"),
     };
   }
+
   const federationConfig = {
-    name: mfConfig.name,
-    library: mfConfig.library
-      ? mfConfig.library
-      : { type: config.output.libraryTarget, name: mfConfig.name },
+    // defaults
+    name: mfConfig.name || "remote",
+    library: { type: config.output.libraryTarget, name: (mfConfig.name || "remote") },
     filename: "static/runtime/remoteEntry.js",
-    remotes: options.isServer
-      ? nextServerRemote(mfConfig.remotes)
-      : mfConfig.remotes,
-    exposes: mfConfig.exposes,
-    shared: mfConfig.shared,
+    exposes: {},
+    remotes: {},
+    shared: [],
+    // merge config
+    ...mfConfig
   };
-  if (!options.webpack.container) {
-    throw new Error("Module Federation only works with Webpack 5");
+
+  // Remove config elements only used by this plugin
+  delete federationConfig.mergeRuntime;
+
+  if(options.isServer){
+    // override remotes when running in a server
+    federationConfig.remotes = nextServerRemote(federationConfig.remotes);
   }
+
   config.plugins.push(
     new options.webpack.container.ModuleFederationPlugin(federationConfig)
   );
+
   if (mfConfig.mergeRuntime) {
     config.plugins.push(new MergeRuntime(federationConfig));
   }
 };
+
 module.exports = withModuleFederation;
