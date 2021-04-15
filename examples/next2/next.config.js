@@ -23,7 +23,20 @@ module.exports = {
           : "next1",
       },
       shared: {
-        lodash: { eager: true, singleton: true, requiredVersion: deps.lodash }
+        lodash: { eager: true, singleton: true, requiredVersion: deps.lodash },
+        react: {
+          singleton: true,
+          eager: true,
+          requiredVersion: deps.react,
+        },
+        "react-dom": {
+          singleton: true,
+          eager: true,
+          requiredVersion: deps["react-dom"],
+        },
+        "styled-jsx": {
+          singleton: true,
+        }
       }
     };
 

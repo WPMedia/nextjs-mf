@@ -12,10 +12,10 @@
     "ssg": "yarn build && yarn export && yarn serve"
   },
   "dependencies": {
-    "@module-federation/nextjs-mf": "../../",
+    "@module-federation/nextjs-mf": "git+https://github.com/wpmedia/nextjs-mf",
     "next": "^10.0.0",
-    "react": "^16.14.0",
-    "react-dom": "^16.14.0",
+    "react": "^16.12.0",
+    "react-dom": "^16.12.0",
     "webpack": "~5.30.0",    
     "lodash": "^4.17.20"
   },
